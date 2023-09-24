@@ -28,16 +28,30 @@ MainScene.prototype.initialize = function() {
     customMat.shader = newShader;
     customMat.update();
 
-    bolt.children[0].children[0].render.meshInstances[0].material = new pc.StandardMaterial();
-    bolt.children[0].children[0].render.meshInstances[1].material = customMat;
+    // bolt.children[0].children[0].render.meshInstances[0].material = new pc.StandardMaterial();
+    // bolt.children[0].children[0].render.meshInstances[0].material.emissive.set(2,0,0);
+    bolt.children[0].children[0].render.meshInstances[0].material = customMat;
+    bolt.children[0].children[0].render.meshInstances[0].material.setParameter('uShadowMap', assets.boltMatCap.resource);
+    
+    // console.log(bolt.children[0].children[0].render.meshInstances[0].material);
+    
     // bolt.children[0].children[0].render.meshInstances[1].material.update();
     
-    // console.log(bolt.children[0].children[1].children[0].children[4].children[0].children[0].name);
-    console.log(bolt.children[0].children[0].render.meshInstances[0].material.variants)
+    // console.log(bolt.children[0].children[1].children[0].children[1].children[0].name);
     
-    // app.on('update', dt => bolt.children[0].children[1].children[0].children[4].children[0].rotate(50 * dt, 0, 0));
+    app.on('update', dt => bolt.children[0].children[1].children[0].children[1].children[0].rotate(50 * dt, 0, 0));
     app.on('update', dt => bolt.rotate(0, 20 * dt, 0));
 
+
+    /*
+    app.render();
+
+    const variants = Object.values(bolt.children[0].children[0].render.meshInstances[0].material.variants);
+    const { fshader, vshader } = variants[0].definition;
+    const fragmentSource = fshader;
+    const vertexSource = vshader;
+    console.log(fragmentSource);
+    */
 
     // bolt.children[0].children[0].render.meshInstances[0].material = customMat;
     // console.log(bolt.children[0].children[0].render.meshInstances[0].material.shader);
@@ -67,20 +81,61 @@ MainScene.prototype.initialize = function() {
     const light = new pc.Entity('light');
     light.addComponent('light',{
         type: "directional",
+        intensity: 1,
+        castShadows: true,
+        shadowResolution: 1024,
+        shadowBias: 0.21,
+        shadowDistance: 8,
+        shadowIntensity: 0.85,
         color: new pc.Color(1, 1, 1),
     });
     app.root.addChild(light);
     light.setEulerAngles(25, 120, 0);
     
+    console.log(light);
+
     // app.on('update', dt => bolt.rotate(10 * dt, 20 * dt, 10 * dt));
 
     //Device resize and orientation listeners
     //window.addEventListener('resize', () => this.resizeMethod());
     //window.addEventListener('orientationchange', () => this.resizeMethod());
+    
+    window.addEventListener('click', () => this.captureGLSL());
+
 };
 
 MainScene.prototype.update = function(dt) {
 
+};
+
+MainScene.prototype.captureGLSL = function() {
+    let bolt = app.root.findByName("Scene.001");
+    // console.log(bolt.children[0].children[0].render.meshInstances[0].material.chunks);
+    var shadowMap = undefined;
+    device.textures.forEach((elmt) => {
+        if(elmt.name == "ShadowMap2D")
+            shadowMap = elmt;
+    });
+    console.log(shadowMap);
+    console.log(shadowMap._glTexture);
+    console.log(device.textures);
+
+    // bolt.children[0].children[0].render.meshInstances[0].material.setParameter('uShadowMap', assets.boltMatCap.resource);
+    return;
+    
+    
+    bolt.children[0].children[0].render.meshInstances[0].material.setParameter('uShadowMap', shadowMap);
+    bolt.children[0].children[0].render.meshInstances[0].material.update();
+
+
+    return;
+
+    app.render();
+    const variants = Object.values(bolt.children[0].children[0].render.meshInstances[0].material.variants);
+    const { fshader, vshader } = variants[0].definition;
+    const fragmentSource = fshader;
+    const vertexSource = vshader;
+    console.log(vertexSource);
 };
 
 MainScene.prototype.swap = function(old) {

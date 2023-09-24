@@ -1,22 +1,26 @@
+// #version 300 es
 
-precision highp float;
+// #define attribute in
+// #define varying out
+
+precision mediump float;
 
 attribute vec3 vVertex;
 attribute vec3 vNormal;
 attribute vec2 vTexCoord;
+attribute vec4 vertex_boneWeights;
+attribute vec4 vertex_boneIndices;
+
 
 varying vec3 Position;
 varying vec3 Normal;
 varying vec2 TexCoord;
 
+
 uniform mat4 matrix_model;
 uniform mat4 matrix_viewProjection;
 uniform mat3 matrix_normal;
-
-attribute vec4 vertex_boneWeights;
-attribute vec4 vertex_boneIndices;
-
-uniform highp sampler2D texture_poseMap;
+uniform mediump sampler2D texture_poseMap;
 uniform vec4 texture_poseMapSize;
 
 void getBoneMatrix(const in float i, out vec4 v1, out vec4 v2, out vec4 v3) {
@@ -69,7 +73,8 @@ mat4 getSkinMatrix(const in vec4 indices, const in vec4 weights) {
 void main() {
 
 	TexCoord = vTexCoord;
-	
+	Normal = vNormal;
+
 	gl_Position = matrix_viewProjection * matrix_model * getSkinMatrix(vertex_boneIndices, vertex_boneWeights) * vec4(vVertex*1.0, 1.0);
 }
 

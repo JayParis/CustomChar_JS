@@ -62,6 +62,9 @@
             mainScene: new pc.Asset("Main-Scene-Script", "script", {
                 url: "./scripts/main-scene.js",
             }),
+            bloom: new pc.Asset("Bloom-Script", "script", {
+                url: "./scripts/posteffect-bloom.js",
+            }),
             safeArea: new pc.Asset("Safe-Area-Script", "script", {
                 url: "./scripts/mobile-safe-area.js",
             }),
@@ -76,21 +79,32 @@
             app.root.script.create("Main-Scene-Script");
 
             uiGroup.addComponent('script');
-            uiGroup.script.create("mobileSafeArea");
+            uiGroup.script.create("mobileSafeArea"); //mobileSafeArea
+
+            camera.addComponent('script');
+            camera.script.create("HDR Bloom",{
+                enabled: true,
+                attributes: {
+                    thresholdA: 1,
+                    thresholdB: 2
+                }
+            });
 
             app.start();
 
             document.getElementById('splash').style.display = 'none';
+
         });
 
         const camera = new pc.Entity('camera');
         camera.addComponent('camera', {
             fov: 60,
             projection: pc.PROJECTION_PERSPECTIVE,
-            clearColor: new pc.Color(0.83137,  0.99216,  1.0) //0.1, 0.1, 0.01
+            clearColor: new pc.Color(0.04,  0.04,  0.04)
         });
         app.root.addChild(camera);
-        camera.setPosition(0, 0, 3);
+        camera.setPosition(0, 0, 4);
+        camera.setEulerAngles(-15, 0, 0);
 
         const screen = new pc.Entity();
         screen.addComponent("screen", {
@@ -109,6 +123,48 @@
             pivot: new pc.Vec2(0.0, 0.0), 
         });
         screen.addChild(uiGroup);
+
+        
+
+        /*
+        camera.addComponent("script");
+        var data = new Object();
+        data.set("scripts", {
+            bloom: {
+                enabled: true,
+                bloomIntensity: 0.8,
+                bloomThreshold: 0.7,
+                blurAmount: 15,
+            },
+        });
+
+        Object.keys(data.get("scripts")).forEach((key) => {
+            camera.script.create(key, {
+                attributes: data.get(`scripts.${key}`),
+            });
+        });
+
+        */
+
+
+        const plane = new pc.Entity('plane');
+        plane.addComponent('model', {
+            type: 'plane'
+        });
+        app.root.addChild(plane);
+        plane.setPosition(0, -2, 0);
+        plane.setEulerAngles(0, 0, 0);
+        plane.setLocalScale(5, 5, 5);
+
+        const box = new pc.Entity('cube');
+        box.addComponent('model', {
+            type: 'box'
+        });
+        app.root.addChild(box);
+        box.setPosition(0, -11.5, 0);
+
+
+
 
         //---
         
