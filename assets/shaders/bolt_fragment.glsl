@@ -1,14 +1,17 @@
+#version 300 es
+
+#define varying in
 
 precision mediump float;
 
-uniform sampler2D uShadowMap;
+uniform highp sampler2DShadow light0_shadowMap;
 uniform float uTime;
 
 varying vec3 Normal;
 varying vec2 TexCoord;
 varying vec3 Position;
 
-
+out vec4 FragColor;
 
 void main()
 {
@@ -16,9 +19,8 @@ void main()
     float lighting = dot(Normal,lightDirection);
     float bright = 6.0;
 
-    vec4 shadowMap0 = texture2D(uShadowMap, TexCoord);
 
     // gl_FragColor = vec4(lighting * bright, 0.0, 0.0, 1.0); //tmp5
-    gl_FragColor = vec4(shadowMap0.rgb, 1.0);
+    FragColor = vec4(lighting * bright, 0.0, 0.0, 1.0);
 }
 

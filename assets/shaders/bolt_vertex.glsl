@@ -1,7 +1,7 @@
-// #version 300 es
+#version 300 es
 
-// #define attribute in
-// #define varying out
+#define attribute in
+#define varying out
 
 precision mediump float;
 
@@ -23,6 +23,7 @@ uniform mat3 matrix_normal;
 uniform mediump sampler2D texture_poseMap;
 uniform vec4 texture_poseMapSize;
 
+    
 void getBoneMatrix(const in float i, out vec4 v1, out vec4 v2, out vec4 v3) {
     float j = i * 3.0;
     float dx = texture_poseMapSize.z;
@@ -33,9 +34,9 @@ void getBoneMatrix(const in float i, out vec4 v1, out vec4 v2, out vec4 v3) {
     y = dy * (y + 0.5);
 
     // read elements of 4x3 matrix
-    v1 = texture2D(texture_poseMap, vec2(dx * (x + 0.5), y));
-    v2 = texture2D(texture_poseMap, vec2(dx * (x + 1.5), y));
-    v3 = texture2D(texture_poseMap, vec2(dx * (x + 2.5), y));
+    v1 = texture(texture_poseMap, vec2(dx * (x + 0.5), y));
+    v2 = texture(texture_poseMap, vec2(dx * (x + 1.5), y));
+    v3 = texture(texture_poseMap, vec2(dx * (x + 2.5), y));
 }
 
 mat4 getSkinMatrix(const in vec4 indices, const in vec4 weights) {
@@ -76,5 +77,7 @@ void main() {
 	Normal = vNormal;
 
 	gl_Position = matrix_viewProjection * matrix_model * getSkinMatrix(vertex_boneIndices, vertex_boneWeights) * vec4(vVertex*1.0, 1.0);
+	//gl_Position = matrix_viewProjection * matrix_model * vec4(vVertex*1.0, 1.0);
+    
 }
 

@@ -28,10 +28,19 @@ MainScene.prototype.initialize = function() {
     customMat.shader = newShader;
     customMat.update();
 
-    // bolt.children[0].children[0].render.meshInstances[0].material = new pc.StandardMaterial();
-    // bolt.children[0].children[0].render.meshInstances[0].material.emissive.set(2,0,0);
-    bolt.children[0].children[0].render.meshInstances[0].material = customMat;
-    bolt.children[0].children[0].render.meshInstances[0].material.setParameter('uShadowMap', assets.boltMatCap.resource);
+    bolt.children[0].children[0].render.meshInstances[0].material = new pc.StandardMaterial();
+    bolt.children[0].children[0].render.meshInstances[0].material.chunks.combinePS = assets.sdrInject.resource;
+    bolt.children[0].children[0].render.meshInstances[0].material.diffuseMap = new pc.Texture(this.app.graphicsDevice, {
+        width: 1,
+        height: 1,
+        format: pc.PIXELFORMAT_R8_G8_B8
+    });
+    bolt.children[0].children[0].render.meshInstances[0].material.update();
+
+
+    // bolt.children[0].children[0].render.meshInstances[0].material = customMat;
+
+    // bolt.children[0].children[0].render.meshInstances[0].material.setParameter('uShadowMap', assets.boltMatCap.resource);
     
     // console.log(bolt.children[0].children[0].render.meshInstances[0].material);
     
@@ -44,13 +53,7 @@ MainScene.prototype.initialize = function() {
 
 
     /*
-    app.render();
-
-    const variants = Object.values(bolt.children[0].children[0].render.meshInstances[0].material.variants);
-    const { fshader, vshader } = variants[0].definition;
-    const fragmentSource = fshader;
-    const vertexSource = vshader;
-    console.log(fragmentSource);
+    
     */
 
     // bolt.children[0].children[0].render.meshInstances[0].material = customMat;
@@ -83,16 +86,30 @@ MainScene.prototype.initialize = function() {
         type: "directional",
         intensity: 1,
         castShadows: true,
-        shadowResolution: 1024,
-        shadowBias: 0.21,
+        shadowResolution: 2048,
+        shadowBias: 0.51,
         shadowDistance: 8,
         shadowIntensity: 0.85,
         color: new pc.Color(1, 1, 1),
     });
     app.root.addChild(light);
-    light.setEulerAngles(25, 120, 0);
+    light.setEulerAngles(35, 120, 0);
     
     console.log(light);
+
+    const pointLight = new pc.Entity('light');
+    pointLight.addComponent('light',{
+        type: "omni",
+        range: 1,
+        intensity: 2,
+        castShadows: false,
+        color: new pc.Color(1, 0, 0),
+    });
+    app.root.addChild(pointLight);
+    pointLight.setPosition(0,0,0.5);
+
+
+
 
     // app.on('update', dt => bolt.rotate(10 * dt, 20 * dt, 10 * dt));
 
@@ -110,6 +127,18 @@ MainScene.prototype.update = function(dt) {
 
 MainScene.prototype.captureGLSL = function() {
     let bolt = app.root.findByName("Scene.001");
+    //console.log(bolt.children[0].children[0].render.meshInstances[0].material);
+
+    app.render();
+
+    const variants = Object.values(bolt.children[0].children[0].render.meshInstances[0].material.variants);
+    const { fshader, vshader } = variants[0].definition;
+    const fragmentSource = fshader;
+    const vertexSource = vshader;
+    console.log(fragmentSource);
+
+    return;
+
     // console.log(bolt.children[0].children[0].render.meshInstances[0].material.chunks);
     var shadowMap = undefined;
     device.textures.forEach((elmt) => {
@@ -128,14 +157,7 @@ MainScene.prototype.captureGLSL = function() {
     bolt.children[0].children[0].render.meshInstances[0].material.update();
 
 
-    return;
-
-    app.render();
-    const variants = Object.values(bolt.children[0].children[0].render.meshInstances[0].material.variants);
-    const { fshader, vshader } = variants[0].definition;
-    const fragmentSource = fshader;
-    const vertexSource = vshader;
-    console.log(vertexSource);
+    
 };
 
 MainScene.prototype.swap = function(old) {
