@@ -1,4 +1,4 @@
-uniform float iGlobalTime;
+
 
 vec3 combineColor(){
     vec3 ret = vec3(1.0);
@@ -6,6 +6,7 @@ vec3 combineColor(){
     float shadow0 = getShadowPCF5x5(SHADOWMAP_PASS(light0_shadowMap), light0_shadowParams);
     ret = vec3(shadow0,shadow0,shadow0) + dDiffuseLight;
 
+    // return vec3(M);
     return ret;
 }
 

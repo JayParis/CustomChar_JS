@@ -50,6 +50,12 @@
                 { url: "./assets/textures/BoltMatCap.jpg" },
                 { type: pc.TEXTURETYPE_RGBP, mipmaps: false }
             ),
+            opaMapTest: new pc.Asset(
+                "Opacity-Map-Test",
+                "texture",
+                { url: "./assets/textures/OpaMapTest.jpg" },
+                { type: pc.TEXTURETYPE_RGBP, mipmaps: false }
+            ),
             bolt: new pc.Asset("Bolt", "container", {
                 url: "./assets/models/CharacterShadingTest_1_Export_10.glb",
             }),
@@ -62,11 +68,17 @@
             sdrInject: new pc.Asset("Shader-Inject", "shader", {
                 url: "./assets/shaders/shader_inject.glsl",
             }),
+            opaInject: new pc.Asset("Opacity-Inject", "shader", {
+                url: "./assets/shaders/opacity_inject.glsl",
+            }),
             mainScene: new pc.Asset("Main-Scene-Script", "script", {
                 url: "./scripts/main-scene.js",
             }),
             bloom: new pc.Asset("Bloom-Script", "script", {
                 url: "./scripts/posteffect-bloom.js",
+            }),
+            bokeh: new pc.Asset("Bokeh-Script", "script", {
+                url: "./scripts/posteffect-bokeh.js",
             }),
             safeArea: new pc.Asset("Safe-Area-Script", "script", {
                 url: "./scripts/mobile-safe-area.js",
@@ -93,6 +105,16 @@
                 }
             });
 
+            camera.addComponent('script');
+            camera.script.create("bokeh",{
+                enabled: true,
+                attributes: {
+                    aperture: 0.1,
+                    maxBlur: 0.02,
+                    focus: 3.0
+                }
+            });
+
             app.start();
 
             document.getElementById('splash').style.display = 'none';
@@ -106,7 +128,7 @@
             clearColor: new pc.Color(0.04,  0.04,  0.04)
         });
         app.root.addChild(camera);
-        camera.setPosition(0, 0, 4);
+        camera.setPosition(-0.98, 1, 4);
         camera.setEulerAngles(-15, 0, 0);
 
         const screen = new pc.Entity();
@@ -158,6 +180,8 @@
         plane.setPosition(0, -2, 0);
         plane.setEulerAngles(0, 0, 0);
         plane.setLocalScale(5, 5, 5);
+
+        //plane.model.receiveShadows = false;
 
         const box = new pc.Entity('cube');
         box.addComponent('model', {

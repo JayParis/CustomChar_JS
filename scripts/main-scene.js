@@ -28,13 +28,34 @@ MainScene.prototype.initialize = function() {
     customMat.shader = newShader;
     customMat.update();
 
+    let setupCustom = true;
+
     bolt.children[0].children[0].render.meshInstances[0].material = new pc.StandardMaterial();
-    bolt.children[0].children[0].render.meshInstances[0].material.chunks.combinePS = assets.sdrInject.resource;
-    bolt.children[0].children[0].render.meshInstances[0].material.diffuseMap = new pc.Texture(this.app.graphicsDevice, {
-        width: 1,
-        height: 1,
-        format: pc.PIXELFORMAT_R8_G8_B8
-    });
+    console.log("This");
+
+    if(setupCustom){
+        bolt.children[0].children[0].render.meshInstances[0].material.chunks.combinePS = assets.sdrInject.resource;
+        bolt.children[0].children[0].render.meshInstances[0].material.chunks.opacityPS = assets.opaInject.resource;
+        bolt.children[0].children[0].render.meshInstances[0].material.diffuseMap = new pc.Texture(this.app.graphicsDevice, {
+            width: 1,
+            height: 1,
+            format: pc.PIXELFORMAT_R8_G8_B8
+        });
+        //let uRes = new Float32Array([canvas.width, canvas.height]);
+        //bolt.children[0].children[0].render.meshInstances[0].material.setParameter('uResolution', uRes);
+        
+        // bolt.children[0].children[0].render.meshInstances[0].material.blendType = pc.BLEND_NORMAL;
+        // bolt.children[0].children[0].render.meshInstances[0].material.opacity = 1.0;
+        // bolt.children[0].children[0].render.meshInstances[0].material.opacityMap = assets.opaMapTest.resource;
+        // bolt.children[0].children[0].render.meshInstances[0].material.opacityMapChannel = 'r';
+    }else{
+        bolt.children[0].children[0].render.meshInstances[0].material.blendType = pc.BLEND_NONE; // BLEND_NORMAL
+        bolt.children[0].children[0].render.meshInstances[0].material.opacity = 1.0;
+        bolt.children[0].children[0].render.meshInstances[0].material.opacityMap = assets.opaMapTest.resource;
+        bolt.children[0].children[0].render.meshInstances[0].material.opacityMapChannel = 'r';
+        bolt.children[0].children[0].render.meshInstances[0].material.alphaTest = 0.175;
+    }
+    
     bolt.children[0].children[0].render.meshInstances[0].material.update();
 
 
@@ -51,6 +72,14 @@ MainScene.prototype.initialize = function() {
     app.on('update', dt => bolt.children[0].children[1].children[0].children[1].children[0].rotate(50 * dt, 0, 0));
     app.on('update', dt => bolt.rotate(0, 20 * dt, 0));
 
+
+
+    const clonedChar = bolt.clone();
+    clonedChar.setPosition(0,0,-2);
+    app.root.addChild(clonedChar);
+
+    app.on('update', dt => clonedChar.children[0].children[1].children[0].children[1].children[0].rotate(50 * dt, 0, 0));
+    app.on('update', dt => clonedChar.rotate(0, -20 * dt, 0));
 
     /*
     
