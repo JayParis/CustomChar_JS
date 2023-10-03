@@ -43,17 +43,24 @@ function BokehEffect(graphicsDevice) {
         {
             vec2 aspectCorrect = vec2( 1.0, uAspect );
 
-            float factor = ((getLinearScreenDepth(vUv0) * -1.0) - uFocus) / camera_params.y;
-            factor = map(factor * -30.0, 0.24,0.27,0.0,1.0);
-
-            vec2 dofblur = vec2 ( clamp( factor * uAperture, -uMaxBlur, uMaxBlur ) );
-            factor = clamp(factor,0.0,1.0);
-
-            dofblur = vec2(0.0095,0.0095);
+            vec2 dofblur = vec2(0.0075,0.0075); //0.0095
 
             vec2 dofblur9 = dofblur * 0.9;
-            vec2 dofblur7 = dofblur * 0.7;
-            vec2 dofblur4 = dofblur * 0.4;
+
+            float dpth = map(getLinearScreenDepth(vUv0) / camera_params.y, 0.004,0.0050,1.0,0.0);
+            dpth = clamp(dpth, 0.0, 1.0);
+            for (int i = 0; i < 8; i += 1) {
+                float tmp_dpth = map(getLinearScreenDepth(vUv0 + ( vec2(  x_array[i],  y_array[i] ) * aspectCorrect) * dofblur9) / camera_params.y, 0.004,0.0050,1.0,0.0);
+                dpth += clamp(tmp_dpth, 0.0, 1.0);
+            }
+            dpth = clamp(dpth / 9.0, 0.0, 1.0);
+            dpth = map(dpth,0.0,0.99,0.0,1.0);
+            dpth = clamp(dpth, 0.0, 1.0);
+
+
+            dofblur9 = dofblur * 0.9 * (1.0 - dpth);
+            vec2 dofblur7 = dofblur * 0.7 * (1.0 - dpth);
+            vec2 dofblur4 = dofblur * 0.4 * (1.0 - dpth);
 
             vec4 col;
 
@@ -102,78 +109,9 @@ function BokehEffect(graphicsDevice) {
             col += texture2D( uColorBuffer, vUv0 + ( vec2( -0.29, -0.29 ) * aspectCorrect ) * dofblur4 );
             col += texture2D( uColorBuffer, vUv0 + ( vec2(  0.0,   0.4  ) * aspectCorrect ) * dofblur4 );
 
-            float remapped = map(factor * -30.0, 0.22,0.28,0.0,1.0);
-
-            gl_FragColor = col / 41.0;
-            // gl_FragColor = vec4(factor * -13.0);
-            // gl_FragColor = vec4(remapped);
-
-            //float rawFactor = map(getLinearScreenDepth(vUv0) / camera_params.y, 0.004,0.0050,1.0,0.0);
-            // float rawFactor = getLinearScreenDepth(vUv0);
-
-            dofblur9 = dofblur * 1.9;
-            float rawFactor = 1.0 - map(getLinearScreenDepth(vUv0) / camera_params.y, 0.004,0.0050,0.0,1.0);
-            rawFactor += 1.0 - map(getLinearScreenDepth(vUv0 + ( vec2(  0.15,  0.37 ) * aspectCorrect ) * dofblur9 ) / camera_params.y, 0.004,0.0050,0.0,1.0) * 0.99952;
-            rawFactor += 1.0 - map(getLinearScreenDepth(vUv0 + ( vec2( -0.37,  0.15 ) * aspectCorrect ) * dofblur9 ) / camera_params.y, 0.004,0.0050,0.0,1.0) * 0.99952;
-            rawFactor += 1.0 - map(getLinearScreenDepth(vUv0 + ( vec2(  0.37, -0.15 ) * aspectCorrect ) * dofblur9 ) / camera_params.y, 0.004,0.0050,0.0,1.0) * 0.99952;
-            rawFactor += 1.0 - map(getLinearScreenDepth(vUv0 + ( vec2( -0.15, -0.37 ) * aspectCorrect ) * dofblur9 ) / camera_params.y, 0.004,0.0050,0.0,1.0) * 0.99952;
-            rawFactor += 1.0 - map(getLinearScreenDepth(vUv0 + ( vec2( -0.15,  0.37 ) * aspectCorrect ) * dofblur9 ) / camera_params.y, 0.004,0.0050,0.0,1.0) * 0.99952;
-            rawFactor += 1.0 - map(getLinearScreenDepth(vUv0 + ( vec2(  0.37,  0.15 ) * aspectCorrect ) * dofblur9 ) / camera_params.y, 0.004,0.0050,0.0,1.0) * 0.99952;
-            rawFactor += 1.0 - map(getLinearScreenDepth(vUv0 + ( vec2( -0.37, -0.15 ) * aspectCorrect ) * dofblur9 ) / camera_params.y, 0.004,0.0050,0.0,1.0) * 0.99952;
-            rawFactor += 1.0 - map(getLinearScreenDepth(vUv0 + ( vec2(  0.15, -0.37 ) * aspectCorrect ) * dofblur9 ) / camera_params.y, 0.004,0.0050,0.0,1.0) * 0.99952;
-
-            // rawFactor = map(rawFactor / 9.0, 0.0,0.99,0.0,1.0);
-
-            // rawFactor = clamp(rawFactor,0.0,1.0);
-            
-            float depthNorm = map(getLinearScreenDepth(vUv0) / camera_params.y, 0.004,0.0050,1.0,0.0);
-            depthNorm = clamp(depthNorm,0.0,1.0);
-            gl_FragColor = vec4(depthNorm);
-            // gl_FragColor = vec4(rawFactor);
-            // gl_FragColor = mix(texture2D( uColorBuffer, vUv0 ), vec4(1.0), rawFactor);
-            
-
-
-            // rawFactor = map(getLinearScreenDepth(vUv0) / camera_params.y, 0.004,0.0050,1.0,0.0);
-            // gl_FragColor = mix(vec4(map(getLinearScreenDepth(vUv0) / camera_params.y, 0.004,0.0050,1.0,0.0),0.0,0.0,1.0), vec4(rawFactor), 1.0 - rawFactor);
-            // gl_FragColor = mix(texture2D( uColorBuffer, vUv0 ), vec4(rawFactor), rawFactor);
-            
-            gl_FragColor.a = 1.0;
-
-
-            //rawFactor = clamp((rawFactor / 9.0) / camera_params.y,0.0,1.0);
-            //rawFactor = map(rawFactor, 0.0,1.0,0.0,1.0);
-            
-            //rawFactor = map(getLinearScreenDepth(vUv0) / camera_params.y, 0.004,0.0050,0.0,1.0);
-
-            // rawFactor = map(getLinearScreenDepth(vUv0 + ( vec2(  0.15,  0.37 ) * aspectCorrect ) * dofblur9 ) / camera_params.y, 0.004,0.0050,0.0,1.0);
-            // rawFactor = clamp(rawFactor,0.0,1.0);
-            // gl_FragColor = vec4(rawFactor);
-
-            // gl_FragColor = mix(texture2D( uColorBuffer, vUv0 ), vec4(rawFactor), 1.0 - rawFactor);
-
-
-            // gl_FragColor = mix(texture2D( uColorBuffer, vUv0 ), col / 41.0, factor);
-            // gl_FragColor.a = 1.0;
-
-            //-----------
-
-            dofblur9 = dofblur * 0.9;
-            float dpth = map(getLinearScreenDepth(vUv0) / camera_params.y, 0.004,0.0050,1.0,0.0);
-            dpth = clamp(dpth, 0.0, 1.0);
-            for (int i = 0; i < 8; i += 1) {
-                float tmp_dpth = map(getLinearScreenDepth(vUv0 + ( vec2(  x_array[i],  y_array[i] ) * aspectCorrect) * dofblur9) / camera_params.y, 0.004,0.0050,1.0,0.0);
-                dpth += clamp(tmp_dpth, 0.0, 1.0);
-            }
-            dpth = clamp(dpth / 9.0, 0.0, 1.0);
-
+            // gl_FragColor = vec4(1.0 - dpth);
             gl_FragColor = mix(col / 41.0, texture2D( uColorBuffer, vUv0 ), dpth);
-            
-            // gl_FragColor = vec4(dpth);
-            // gl_FragColor = vec4(0.0,1.0,0.0,1.0);
             gl_FragColor.a = 1.0;
-
-
 
         }
         `
