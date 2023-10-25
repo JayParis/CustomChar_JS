@@ -47,7 +47,7 @@
             boltMatCap: new pc.Asset(
                 "Bolt-MatCap",
                 "texture",
-                { url: "./assets/textures/BoltMatCap.jpg" },
+                { url: "./assets/textures/T000_Edit_WP.webp" },
                 { type: pc.TEXTURETYPE_RGBP, mipmaps: false }
             ),
             opaMapTest: new pc.Asset(
@@ -56,8 +56,14 @@
                 { url: "./assets/textures/OpaMapTest.jpg" },
                 { type: pc.TEXTURETYPE_RGBP, mipmaps: false }
             ),
+            envMap: new pc.Asset(
+                "Environment-Map",
+                "texture",
+                { url: "./assets/textures/BlurredSkybox.webp" },
+                { type: pc.TEXTURETYPE_RGBP, mipmaps: false }
+            ),
             bolt: new pc.Asset("Bolt", "container", {
-                url: "./assets/models/CharacterShadingTest_1_Export_10.glb",
+                url: "./assets/models/RealToonTest_1.glb", // CharacterShadingTest_1_Export_10
             }),
             vs: new pc.Asset("Bolt-Vertex-Shader", "shader", {
                 url: "./assets/shaders/bolt_vertex.glsl",
@@ -74,8 +80,14 @@
             mainScene: new pc.Asset("Main-Scene-Script", "script", {
                 url: "./scripts/main-scene.js",
             }),
+            brightnessContrast: new pc.Asset("BrightnessContrast-Script", "script", {
+                url: "./scripts/posteffect-brightnesscontrast.js",
+            }),
             bloom: new pc.Asset("Bloom-Script", "script", {
                 url: "./scripts/posteffect-bloom.js",
+            }),
+            ssao: new pc.Asset("SSAO-Script", "script", {
+                url: "./scripts/posteffect-ssao.js",
             }),
             bokeh: new pc.Asset("Bokeh-Script", "script", {
                 url: "./scripts/posteffect-bokeh.js",
@@ -101,7 +113,25 @@
                 enabled: true,
                 attributes: {
                     thresholdA: 1,
-                    thresholdB: 2
+                    thresholdB: 2.9
+                }
+            });
+            
+            camera.addComponent('script');
+            camera.script.create("brightnessContrast",{
+                enabled: true,
+                attributes: {
+                    brightness: 0.03,
+                    contrast: 0.3
+                }
+            });
+
+            camera.addComponent('script');
+            camera.script.create("ssao",{
+                enabled: true,
+                attributes: {
+                    brightness: 0.240,
+                    radius: 0.35
                 }
             });
             /*
@@ -121,14 +151,17 @@
 
         });
 
+        const camPivot = new pc.Entity('camHolder');
+        app.root.addChild(camPivot);
+
         const camera = new pc.Entity('camera');
         camera.addComponent('camera', {
             fov: 60,
             projection: pc.PROJECTION_PERSPECTIVE,
             clearColor: new pc.Color(0.04,  0.04,  0.04)
         });
-        app.root.addChild(camera);
-        camera.setPosition(-0.98, 1, 4);
+        camPivot.addChild(camera);
+        camera.setPosition(-0.498, 1.3, 3.59);
         camera.setEulerAngles(-15, 0, 0);
 
         const screen = new pc.Entity();
@@ -183,14 +216,15 @@
 
         //plane.model.receiveShadows = false;
 
-        const box = new pc.Entity('cube');
-        box.addComponent('model', {
-            type: 'box'
+        const sphere = new pc.Entity('sphere');
+        sphere.addComponent('model', {
+            type: 'sphere'
         });
-        app.root.addChild(box);
-        box.setPosition(0, -11.5, 0);
+        app.root.addChild(sphere);
+        sphere.setPosition(-1, -0.5, 0);
 
 
+        
 
 
         //---
