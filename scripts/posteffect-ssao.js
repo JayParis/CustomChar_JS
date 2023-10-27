@@ -345,6 +345,7 @@ function SSAOEffect(graphicsDevice, ssaoScript) {
         "    vec4 inCol = texture2D( uColorBuffer, vUv0 );",
         // "    vec4 satCol = inCol * saturationMatrix(1.2);",
         "    vec4 satCol = inCol * (vec4(0.7686, 0.3647, 0.5019, 1.0) * 1.35);",
+        // "    satCol *= 0.05;",
         "    float ssao = texture2D( uSSAOBuffer, vUv0 ).a;",
         "    gl_FragColor.rgb = mix(satCol.rgb, inCol.rgb, ssao);",
         "    gl_FragColor.a = inCol.a;",

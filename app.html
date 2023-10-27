@@ -31,6 +31,8 @@
             keyboard: new pc.Keyboard(window),
         });
 
+        app.start();
+
         var device = pc.Application.getApplication().graphicsDevice;
         device.maxPixelRatio = window.devicePixelRatio;
 
@@ -95,6 +97,10 @@
             safeArea: new pc.Asset("Safe-Area-Script", "script", {
                 url: "./scripts/mobile-safe-area.js",
             }),
+            physicalOps: new pc.Asset("Physical-Ops-Asset", "script", {
+                url: "./scripts/physical-ops.js",
+            }),
+
         };
         const assetListLoader = new pc.AssetListLoader(
             Object.values(assets),
@@ -145,7 +151,17 @@
                 }
             });
             */
-            app.start();
+
+            
+            pc.WasmModule.setConfig("Ammo", {
+                glueUrl: "./scripts/physics/ammo.wasm.js",
+                wasmUrl: "./scripts/physics/ammo.wasm.wasm",
+                fallbackUrl: "./scripts/physics/ammo.js",
+            });
+            pc.WasmModule.getInstance("Ammo",(val) => {
+                app.root.addComponent('script');
+                app.root.script.create("Physical-Ops");
+            });
 
             document.getElementById('splash').style.display = 'none';
 
@@ -209,6 +225,10 @@
         plane.addComponent('model', {
             type: 'plane'
         });
+        plane.addComponent('collision', {
+            type: 'box',
+            halfExtents: [2.5,0.15,2.5]
+        });
         app.root.addChild(plane);
         plane.setPosition(0, -2, 0);
         plane.setEulerAngles(0, 0, 0);
@@ -221,10 +241,7 @@
             type: 'sphere'
         });
         app.root.addChild(sphere);
-        sphere.setPosition(-1, -0.5, 0);
-
-
-        
+        sphere.setPosition(-1, -10.5, 0);
 
 
         //---

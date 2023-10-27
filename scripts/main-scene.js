@@ -36,7 +36,7 @@ MainScene.prototype.initialize = function() {
     // bolt.children[0].render.meshInstances[0].material.specular.set(1, 1, 1);
     bolt.children[1].render.meshInstances[0].material = new pc.BasicMaterial();
     // bolt.children[1].render.meshInstances[0].material.diffuse.set(1.0,0.0,0.0);
-    bolt.children[1].render.meshInstances[0].material.color.set(0.0,0.0,0.0); // Outline
+    bolt.children[1].render.meshInstances[0].material.color.set(0.5333, 0.2901, 0.2862); // Outline
     bolt.children[1].render.meshInstances[0].material.cull = pc.CULLFACE_FRONT;
     bolt.children[2].render.meshInstances[0].material = new pc.StandardMaterial();
     bolt.children[2].render.meshInstances[0].material.diffuseMap = assets.boltMatCap.resource;
@@ -91,7 +91,6 @@ MainScene.prototype.initialize = function() {
     app.scene.toneMapping = pc.TONEMAP_FILMIC; //TONEMAP_FILMIC
     app.scene.gammaCorrection = pc.GAMMA_SRGB;
     // app.scene.exposure = 0.390;
-    console.log(app.scene);
 
     
     // console.log(plane.model.material);
