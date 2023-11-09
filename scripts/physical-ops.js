@@ -48,6 +48,10 @@ PhysicalOps.prototype.initialize = function(){
     mat_A.diffuse.set(1, 0, 0);
     var mat_B = new pc.StandardMaterial();
     mat_B.diffuse.set(0, 1, 0);
+    mat_B.specular.set(1, 1, 1);
+    mat_B.enableGGXSpecular = true;
+    mat_B.anisotropy = -0.5;
+    mat_B.gloss = 0.65;
 
     box_R.model.material = mat_A;
     box_RP.model.material = mat_B;
@@ -68,7 +72,7 @@ PhysicalOps.prototype.initialize = function(){
         color: new pc.Color(1, 1, 1),
     });
     this.app.root.addChild(light);
-    light.setEulerAngles(35, 59, 0);
+    light.setEulerAngles(35, 53, 0);
 
     // --- Character STATIC Mesh
     /*
@@ -107,11 +111,16 @@ PhysicalOps.prototype.initialize = function(){
     const charSkinned = assets.charSkinnedGLB.resource.instantiateRenderEntity({});
     charSkinned.rotate(0,180,0);
     charSkinned.setLocalScale(0.06,0.06,0.06);
-    charSkinned.setPosition(0.0,-2.0,0.0);
+    charSkinned.setPosition(0.0,-12.0,0.0); // -2.0
     this.app.root.addChild(charSkinned);
 
     charSkinned.children[0].render.meshInstances[0].material = new pc.StandardMaterial();
-    // charSkinned.children[0].render.meshInstances[0].material.specular.set(1, 1, 1);
+    charSkinned.children[0].render.meshInstances[0].material.specular.set(1, 1, 1);
+    charSkinned.children[0].render.meshInstances[0].material.enableGGXSpecular = true;
+    charSkinned.children[0].render.meshInstances[0].material.anisotropy = -0.5;
+    charSkinned.children[0].render.meshInstances[0].material.gloss = 0.65; // 0.75
+    console.log(charSkinned.children[0].render.meshInstances[0].material.gloss);
+
     charSkinned.children[1].render.meshInstances[0].material = new pc.BasicMaterial();
     // charSkinned.children[1].render.meshInstances[0].material.diffuse.set(1.0,0.0,0.0);
     charSkinned.children[1].render.meshInstances[0].material.color.set(0.5333, 0.2901, 0.2862); // Outline
@@ -131,9 +140,36 @@ PhysicalOps.prototype.initialize = function(){
 
     charSkinned.children[0].render.meshInstances[0].material.update();
 
-    // this.app.on('update', dt => charSkinned.rotate(0, 20 * dt, 0));
+    this.app.on('update', dt => charSkinned.rotate(0, 20 * dt, 0));
 
     console.log(charSkinned.children[0].name);
+
+    // --- Character HIGH Mesh
+
+    const charHigh = assets.charLowGLB.resource.instantiateRenderEntity({});
+    charHigh.rotate(0,0,0);
+    charHigh.setLocalScale(0.053,0.053,0.053);
+    charHigh.setPosition(0.0,-2.0,0.0);
+    this.app.root.addChild(charHigh);
+
+    charHigh.render.meshInstances[0].material = new pc.StandardMaterial();
+    charHigh.render.meshInstances[0].material.specular.set(1, 1, 1);
+    charHigh.render.meshInstances[0].material.enableGGXSpecular = true;
+    charHigh.render.meshInstances[0].material.anisotropy = -0.5;
+    charHigh.render.meshInstances[0].material.gloss = 0.65; // 0.75
+    charHigh.render.meshInstances[0].material.normalMap = assets.charLow_Norm.resource;
+    charHigh.render.meshInstances[0].material.bumpiness = 1.08;
+    charHigh.render.meshInstances[0].material.chunks.combinePS = assets.sdrInject.resource;
+    charHigh.render.meshInstances[0].material.diffuseMap = new pc.Texture(this.app.graphicsDevice, {
+        width: 1,
+        height: 1,
+        format: pc.PIXELFORMAT_R8_G8_B8
+    });
+    charHigh.render.meshInstances[0].material.setParameter('uSkinMap', assets.charLow_AO.resource);
+    charHigh.render.meshInstances[0].material.setParameter('uEnvironmentMap', assets.envMap.resource);
+    charHigh.render.meshInstances[0].material.update();
+    
+    this.app.on('update', dt => charHigh.rotate(0, 20 * dt, 0));
 
 
     this.app.scene.toneMapping = pc.TONEMAP_FILMIC; //TONEMAP_FILMIC
@@ -188,6 +224,8 @@ PhysicalOps.prototype.onMouseDown = function(event){
         this.showTransformDir();
         simulate = true;
     }
+    if(event.y < 100)
+        this.getShaderGLSL();
     LMBheld = true;
 }
 
@@ -278,4 +316,15 @@ PhysicalOps.prototype.showTransformDir = function(){
     this.app.root.addChild(box_C);
 
     console.log(chest_R_LocalPos);
+}
+
+PhysicalOps.prototype.getShaderGLSL = function(){
+    let characterGLB = this.app.root.findByName("Anime_Female_Basemodel_low"); // Box-RP Armature
+    //characterGLB.children[0].render.meshInstances[0].material.variants
+    //characterGLB.model.material.variants
+    const variants = Object.values(characterGLB.render.meshInstances[0].material.variants);
+    const { fshader, vshader } = variants[0].definition;
+    const fragmentSource = fshader;
+    const vertexSource = vshader;
+    console.log(fragmentSource);
 }

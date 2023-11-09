@@ -26,10 +26,12 @@ float calcLightSpecular(float gloss, vec3 worldNormal, vec3 h, float powerMod) {
     return pow(nh, specPow) * (specPow + 2.0) / 8.0;
 }
 
-//dDiffuseLight (contains 3x3 shadow map)
-//light0_direction
+// dDiffuseLight (contains 3x3 shadow map)
+// light0_direction
+// dHalfDirW
+// dSpecularLight
 
-vec3 combineColor(){
+vec3 OLD(){
     vec3 ret = vec3(1.0);
 
     float shadow0 = getShadowPCF5x5(SHADOWMAP_PASS(light0_shadowMap), light0_shadowParams);
@@ -72,6 +74,7 @@ vec3 combineColor(){
     ret += fresnel * customLightFalloffShadowed * 0.75; //2.09
 
     float backlightMask = pow(abs(fullDiffuse), 0.75); // 2.0 3.0
+    /*
 
     float spec_1 = clamp01(calcLightSpecular(0.15,dVertexNormalW,dViewDirW,1.0));
     spec_1 = qMap(spec_1,0.05,1.0) * 0.3;
@@ -86,11 +89,104 @@ vec3 combineColor(){
 
     ret *= 1.0 - ((spec_2_Bottom - spec_2_Top) * 0.05);
     ret += spec_2_Top * 0.15;
+    */
+
+    float spec_1 = clamp01(calcLightSpecular(0.15,dVertexNormalW,dViewDirW,1.0));
+    spec_1 = qMap(spec_1,0.05,1.0) * 0.3;
+    spec_1 *= 1.0 - clamp01(((backlightMask * clamp01(fullDiffuse * -1.0)) * 4.0));
+    spec_1 *= customLightFalloffShadowed;
+    
+    ret = mix(ret,vec3(1.0,1.0,1.0),spec_1 * 3.0);
+
+    float spec_2_Top = clamp01(calcLightSpecular(0.99,dVertexNormalW,dViewDirW,1.2));
+    float spec_2_Bottom = clamp01(calcLightSpecular(0.9,dVertexNormalW,dViewDirW,1.2));
+
+    ret *= 1.0 - ((spec_2_Bottom - spec_2_Top) * 0.05);
+    ret += spec_2_Top * 0.15;
+
+    float spec_3 = clamp01(calcLightSpecular(0.15,dVertexNormalW,dViewDirW,1.0));
+    spec_3 = qMap(spec_3,0.405,1.0) * 0.3;
+    spec_3 *= customLightFalloffShadowed;
+
+    ret += spec_3 * 1.915;
+    
 
     // ret *= (1.0 - customLightFalloffShadowed) * 0.75 + customLightFalloffShadowed;
 
     // return vec3((1.0 - customLightFalloffShadowed) * 0.5 + customLightFalloffShadowed);
+    //ret = texture(uSkinMap,vUv0).rgb;
+    // ret = vec3(spec_2);
     return ret * 3.0;
 }
+
+vec3 combineColor(){
+    vec3 ret = vec3(1.0); 
+    
+    float shadow0 = getShadowPCF5x5(SHADOWMAP_PASS(light0_shadowMap), light0_shadowParams);
+    // float NdotL = dot(dVertexNormalW, light0_direction) * -1.0;
+    float NdotL = dot(dNormalW, light0_direction) * -1.0;
+    float sharpness = 0.24;
+    float diffuse = smoothstep(-sharpness,sharpness,NdotL);
+
+    shadow0 = clamp01(shadow0 + 0.6);
+    float attenuation = clamp01(diffuse * shadow0);
+
+    vec3 skinColourTop = vec3(1.0, 0.75, 0.57);
+    vec3 skinColourMid = vec3(0.84, 0.34, 0.22);
+    vec3 skinColourDark = vec3(0.84, 0.35, 0.23) * 0.40;
+
+    //  skinColourTop = vec3(0.57, 0.85, 1.0);
+    //  skinColourMid = vec3(0.22, 0.56, 0.84);
+    //  skinColourDark = vec3(0.23, 0.46, 0.84) * 0.40;
+
+    vec3 skinColourSSS = vec3(0.97, 0.64, 0.56);
+    vec3 skinColourSSS2 = vec3(0.98, 0.75, 0.7);
+    vec3 skinColourSSS3 = vec3(0.34, 0.11, 0.06);
+    
+    //  skinColourSSS3 = vec3(0.13, 0.06, 0.34);
+
+
+    vec3 lightSkinColour = Grad3(skinColourDark,skinColourMid,skinColourTop,0.5,attenuation);
+
+    // float skinAO = qMap(texture(uSkinMap, vUv0).r,0.6481818,0.927273);
+    float skinAO = qMap(texture(uSkinMap, vUv0).r,0.311818,0.927273);
+    // attenuation *= skinAO;
+    // skinAO = 1.0; // Delete
+    lightSkinColour = mix(skinColourMid * 0.51,lightSkinColour,skinAO);
+
+    float sharpness2 = 0.65;
+    float diffuse2 = smoothstep(-sharpness2,sharpness2,NdotL);
+
+    lightSkinColour = mix(skinColourSSS3 * 0.494,lightSkinColour,diffuse2);
+
+    float spec_1 = clamp01(calcLightSpecular(0.15,dVertexNormalW,dViewDirW,1.0));
+    spec_1 = pow(spec_1,2.0) * 1.55;
+    spec_1 *= clamp01(attenuation + 0.135) * 1.0;
+
+    float fresnel = pow(1.0 - dot(normalize(dViewDirW), normalize(dVertexNormalW)), 5.0); //7.0
+
+    lightSkinColour = mix(lightSkinColour,vec3(1.0),spec_1);
+    lightSkinColour += fresnel * attenuation * 0.75;
+
+    float spec_2 = clamp01(calcLightSpecular(0.9,dVertexNormalW,dViewDirW,1.20));
+    spec_2 *= clamp01(attenuation + 0.05);
+    spec_2 = clamp01(dSpecularLight.r);
+
+    // lightSkinColour += spec_2;
+    lightSkinColour = mix(lightSkinColour,vec3(0.9),spec_2);
+
+    // lightSkinColour = mix(skinColourMid * 0.25,lightSkinColour, skinAO * attenuation);
+
+    ret = lightSkinColour;
+    // ret = vec3(dSpecularLight.r); //dSpecularLight
+    // ret = vec3(clamp01(spec_2));
+    // ret = vec3(skinAO * attenuation);
+    // ret = vec3(dot(dNormalW,light0_direction * -1.0));
+    // ret = vec3(clamp01(dot(dNormalW * 2.0, normalize(light0_direction * -1.0))));
+    // ret = vec3(dot(dNormalW, light0_direction) * -1.0);
+    return ret * 3.0;
+    // return OLD();
+}
+
 
 

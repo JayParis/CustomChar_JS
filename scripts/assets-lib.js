@@ -8,6 +8,18 @@ const assets = {
         { url: "./assets/textures/T000_Edit_WP.webp" },
         { type: pc.TEXTURETYPE_RGBP, mipmaps: false }
     ),
+    charLow_AO: new pc.Asset(
+        "Char-Low-AO",
+        "texture",
+        { url: "./assets/textures/CharLow_AO.webp" },
+        { type: pc.TEXTURETYPE_RGBP, mipmaps: false }
+    ),
+    charLow_Norm: new pc.Asset(
+        "Char-Low-Norm",
+        "texture",
+        { url: "./assets/textures/CharLow_Norm.webp" },
+        { type: pc.TEXTURETYPE_RGBP, mipmaps: false }
+    ),
     opaMapTest: new pc.Asset(
         "Opacity-Map-Test",
         "texture",
@@ -24,8 +36,15 @@ const assets = {
     //     url: "./assets/models/RealToonTest_1.glb",
     // }),
     charSkinnedGLB: new pc.Asset("Char-Skinned-GLB", "container", {
-        url: "./assets/models/RealToonTest_Rigged_Edit_2.glb",
+        url: "./assets/models/RealToonTest_Rigged_Edit_3.glb",
     }),
+    charHighGLB: new pc.Asset("Char-High-GLB", "container", {
+        url: "./assets/models/FemaleBaseHigh_1.glb",
+    }),
+    charLowGLB: new pc.Asset("Char-Low-GLB", "container", {
+        url: "./assets/models/FemaleBaseLow_1.glb",
+    }),
+    
     vs: new pc.Asset("Bolt-Vertex-Shader", "shader", {
         url: "./assets/shaders/bolt_vertex.glsl",
     }),
