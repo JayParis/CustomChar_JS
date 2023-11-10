@@ -42,7 +42,7 @@ const assets = {
         url: "./assets/models/FemaleBaseHigh_1.glb",
     }),
     charLowGLB: new pc.Asset("Char-Low-GLB", "container", {
-        url: "./assets/models/FemaleBaseLow_1.glb",
+        url: "./assets/models/FemaleBaseLow_3.glb",
     }),
     
     vs: new pc.Asset("Bolt-Vertex-Shader", "shader", {
@@ -51,12 +51,23 @@ const assets = {
     fs: new pc.Asset("Bolt-Fragment-Shader", "shader", {
         url: "./assets/shaders/bolt_fragment.glsl",
     }),
+
     sdrInject: new pc.Asset("Shader-Inject", "shader", {
         url: "./assets/shaders/shader_inject.glsl",
+    }),
+    TBNInject: new pc.Asset("TBN-Inject", "shader", {
+        url: "./assets/shaders/TBN_inject.glsl",
+    }),
+    startVSInject: new pc.Asset("Start-VS-Inject", "shader", {
+        url: "./assets/shaders/startVS_inject.glsl",
+    }),
+    startPSInject: new pc.Asset("Start-PS-Inject", "shader", {
+        url: "./assets/shaders/startPS_inject.glsl",
     }),
     opaInject: new pc.Asset("Opacity-Inject", "shader", {
         url: "./assets/shaders/opacity_inject.glsl",
     }),
+    
     brightnessContrast: new pc.Asset("BrightnessContrast-Script", "script", {
         url: "./scripts/posteffect-brightnesscontrast.js",
     }),

@@ -16,7 +16,7 @@ PhysicalOps.prototype.initialize = function(){
     box_R.addComponent('model', {
         type: 'box' 
     });
-    box_R.setPosition(0.0, 0.0, 0.0);
+    box_R.setPosition(-1.0, 0.0, 0.0);
     box_R.setLocalScale(0.5, 0.5, 0.5);
     this.app.root.addChild(box_R);
 
@@ -24,7 +24,7 @@ PhysicalOps.prototype.initialize = function(){
     box_RP.addComponent('model', {
         type: 'sphere' 
     });
-    box_RP.setPosition(0.0, -2.5, 0.0);
+    box_RP.setPosition(-1.0, -2.5, 0.0);
     this.app.root.addChild(box_RP);
 
 
@@ -32,7 +32,7 @@ PhysicalOps.prototype.initialize = function(){
     box_L.addComponent('model', {
         type: 'box' 
     });
-    box_L.setPosition(2.0, 0.0, 0.0);
+    box_L.setPosition(-3.0, 0.0, 0.0);
     box_L.setLocalScale(0.5, 0.5, 0.5);
     this.app.root.addChild(box_L);
 
@@ -40,7 +40,7 @@ PhysicalOps.prototype.initialize = function(){
     box_LP.addComponent('model', {
         type: 'sphere' 
     });
-    box_LP.setPosition(2.0, -2.5, 0.0);
+    box_LP.setPosition(-3.0, -2.5, 0.0);
     this.app.root.addChild(box_LP);
 
 
@@ -67,12 +67,15 @@ PhysicalOps.prototype.initialize = function(){
         castShadows: true,
         shadowResolution: 2048,
         shadowBias: 0.51,
-        shadowDistance: 8,
+        shadowDistance: 15,
         shadowIntensity: 0.85,
         color: new pc.Color(1, 1, 1),
     });
     this.app.root.addChild(light);
-    light.setEulerAngles(35, 53, 0);
+    // light.setEulerAngles(35, 53, 0);
+    // light.setEulerAngles(45, 130, 0);
+    light.setEulerAngles(-45, 0, 0);
+    // this.app.on('update', dt => light.rotate(0, 20 * dt, 0));
 
     // --- Character STATIC Mesh
     /*
@@ -147,19 +150,24 @@ PhysicalOps.prototype.initialize = function(){
     // --- Character HIGH Mesh
 
     const charHigh = assets.charLowGLB.resource.instantiateRenderEntity({});
-    charHigh.rotate(0,0,0);
-    charHigh.setLocalScale(0.053,0.053,0.053);
-    charHigh.setPosition(0.0,-2.0,0.0);
+    charHigh.rotate(0,180,0);
+    charHigh.setLocalScale(0.2,0.2,0.2);
+    charHigh.setPosition(0.0,0.0,0.0);
     this.app.root.addChild(charHigh);
 
     charHigh.render.meshInstances[0].material = new pc.StandardMaterial();
     charHigh.render.meshInstances[0].material.specular.set(1, 1, 1);
     charHigh.render.meshInstances[0].material.enableGGXSpecular = true;
-    charHigh.render.meshInstances[0].material.anisotropy = -0.5;
+    charHigh.render.meshInstances[0].material.anisotropy = -0.0;
     charHigh.render.meshInstances[0].material.gloss = 0.65; // 0.75
     charHigh.render.meshInstances[0].material.normalMap = assets.charLow_Norm.resource;
+    charHigh.render.meshInstances[0].material.clearCoatNormalMap = assets.charLow_Norm.resource;
+    charHigh.render.meshInstances[0].material.clearCoat = 1;
     charHigh.render.meshInstances[0].material.bumpiness = 1.08;
     charHigh.render.meshInstances[0].material.chunks.combinePS = assets.sdrInject.resource;
+    // charHigh.render.meshInstances[0].material.chunks.tangentBinormalVS = assets.TBNInject.resource;
+    // charHigh.render.meshInstances[0].material.chunks.startVS = assets.startVSInject.resource;
+    // charHigh.render.meshInstances[0].material.chunks.startPS = assets.startPSInject.resource;
     charHigh.render.meshInstances[0].material.diffuseMap = new pc.Texture(this.app.graphicsDevice, {
         width: 1,
         height: 1,
@@ -169,11 +177,37 @@ PhysicalOps.prototype.initialize = function(){
     charHigh.render.meshInstances[0].material.setParameter('uEnvironmentMap', assets.envMap.resource);
     charHigh.render.meshInstances[0].material.update();
     
-    this.app.on('update', dt => charHigh.rotate(0, 20 * dt, 0));
+
+    // this.app.on('update', dt => charHigh.rotate(0, 20 * dt, 0));
+    const anisoSphere = new pc.Entity("AnisoSphere");
+    anisoSphere.addComponent('model',{
+        type: 'sphere' 
+    });
+    anisoSphere.setPosition(0,-13,0);
+    anisoSphere.setLocalScale(3,3,3);
+    anisoSphere.model.material = new pc.StandardMaterial();
+    anisoSphere.model.material.specular.set(1, 1, 1);
+    anisoSphere.model.material.enableGGXSpecular = true;
+    anisoSphere.model.material.anisotropy = -0.0;
+    anisoSphere.model.material.gloss = 0.65; // 0.75
+    anisoSphere.model.material.normalMap = assets.charLow_Norm.resource;
+    anisoSphere.model.material.bumpiness = 1.08;
+    anisoSphere.model.material.chunks.combinePS = assets.sdrInject.resource;
+    anisoSphere.model.material.diffuseMap = new pc.Texture(this.app.graphicsDevice, {
+        width: 1,
+        height: 1,
+        format: pc.PIXELFORMAT_R8_G8_B8
+    });
+    anisoSphere.model.material.setParameter('uSkinMap', assets.charLow_AO.resource);
+    anisoSphere.model.material.setParameter('uEnvironmentMap', assets.envMap.resource);
+    anisoSphere.model.material.update();
+    this.app.root.addChild(anisoSphere);
 
 
-    this.app.scene.toneMapping = pc.TONEMAP_FILMIC; //TONEMAP_FILMIC
-    this.app.scene.gammaCorrection = pc.GAMMA_SRGB;
+    this.app.scene.toneMapping = pc.TONEMAP_ACES2; //TONEMAP_FILMIC
+    this.app.scene.gammaCorrection = pc.GAMMA_SRGB; //GAMMA_SRGB
+    // this.app.scene.exposure = 1.5;
+    // console.log(this.app.scene.exposure);
 
     // --- Physics Setup
     
@@ -319,12 +353,12 @@ PhysicalOps.prototype.showTransformDir = function(){
 }
 
 PhysicalOps.prototype.getShaderGLSL = function(){
-    let characterGLB = this.app.root.findByName("Anime_Female_Basemodel_low"); // Box-RP Armature
+    let characterGLB = this.app.root.findByName("Anime_Female_Basemodel_low"); // Anime_Female_Basemodel_low Box-RP
     //characterGLB.children[0].render.meshInstances[0].material.variants
     //characterGLB.model.material.variants
     const variants = Object.values(characterGLB.render.meshInstances[0].material.variants);
     const { fshader, vshader } = variants[0].definition;
     const fragmentSource = fshader;
     const vertexSource = vshader;
-    console.log(fragmentSource);
+    console.log(vertexSource);
 }

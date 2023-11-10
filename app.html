@@ -55,14 +55,21 @@
 
                 const camera = new pc.Entity('camera');
                 camera.addComponent('camera', {
-                    fov: 60,
+                    fov: 75, // 60
                     projection: pc.PROJECTION_PERSPECTIVE,
-                    clearColor: new pc.Color(0.01, 0.01, 0.01) //0.1, 0.1, 0.01
+                    clearColor: new pc.Color(0.0, 0.0, 0.0) //0.1, 0.1, 0.01
                 });
-                app.root.addChild(camera);
                 // camera.setPosition(0, 0, 10);
-                camera.setPosition(-0.498, 1.3, 3.59); // 3.59
-                camera.setEulerAngles(-15, 0, 0);
+                // camera.setPosition(-0.498, 1.3, 3.59); // 3.59
+                camera.setPosition(0, 5, -10); // 3.59
+                // camera.setEulerAngles(-15, 0, 0);
+                camera.setEulerAngles(0, 180, 0);
+                const camPivot = new pc.Entity('camera');
+                app.root.addChild(camPivot);
+                camPivot.addChild(camera);
+                app.on('update', dt => camPivot.rotate(0, 20 * dt, 0));
+                camPivot.rotate(0,180,0);
+                
 
                 const screen = new pc.Entity();
                 screen.addComponent("screen", {
@@ -84,7 +91,7 @@
 
                 camera.addComponent('script');
                 camera.script.create("HDR Bloom",{
-                    enabled: true,
+                    enabled: false,
                     attributes: {
                         thresholdA: 1,
                         thresholdB: 2.9
@@ -93,16 +100,16 @@
                 
                 camera.addComponent('script');
                 camera.script.create("brightnessContrast",{
-                    enabled: true,
+                    enabled: false,
                     attributes: {
-                        brightness: 0.03,
-                        contrast: 0.3
+                        brightness: 0.03, // 0.03
+                        contrast: 0.3 // 0.3
                     }
                 });
 
                 camera.addComponent('script');
                 camera.script.create("ssao",{
-                    enabled: true,
+                    enabled: false,
                     attributes: {
                         brightness: 0.240,
                         radius: 0.35
